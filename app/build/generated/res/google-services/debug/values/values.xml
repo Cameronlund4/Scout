@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">148201174644-ck0q8idrvvoot7bnfsiq5crho1g7cqc6.apps.googleusercontent.com</string>
+    <string name="firebase_database_url" translatable="false">https://scout-5135c.firebaseio.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">148201174644</string>
+    <string name="google_api_key" translatable="false">AIzaSyDT-u9cu1yUOkqdfJJ0uAxHT2sAt4cbAz0</string>
+    <string name="google_app_id" translatable="false">1:148201174644:android:75e8c852ba1510b3</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyDT-u9cu1yUOkqdfJJ0uAxHT2sAt4cbAz0</string>
+    <string name="google_storage_bucket" translatable="false">scout-5135c.appspot.com</string>
+</resources>
