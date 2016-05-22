@@ -25,7 +25,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingTop="?android:attr/actionBarSize">
+        android:paddingTop="?android:attr/actionBarSize"
+        android:id="@+id/contentMain">
 
         <fragment
             android:id="@+id/eventListFragment"
@@ -33,5 +34,33 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:layout="@layout/fragment_event_list" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/mainLoading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:paddingTop="?android:attr/actionBarSize">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textSize="30sp"
+            android:text="@string/loading"
+            android:id="@+id/mainLoadingSuper"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textSize="15sp"
+            android:singleLine="true"
+            android:text="Detailed text that ends in..."
+            android:ellipsize="end"
+            android:id="@+id/mainLoadingSub"
+            android:layout_below="@id/mainLoadingSuper"/>
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

@@ -52,6 +52,17 @@ public class Location {
         return message;
     }
 
+    public String makeDirectable() {
+        String address = "";
+        address += line1.length() > 0 ? line1+" " : "";
+        address += line2.length() > 0 ? line2+" " : "";
+        address += city.length() > 0 ? city+" " : "";
+        address += region.length() > 0 ? region+" " : "";
+        address += zip.length() > 0 ? zip+" " : "";
+        address += country.length() > 0 ? country+" " : "";
+        return address;
+    }
+
     public String serialize() {
         return serialize(line1, line2, zip, city, region, country, venue);
     }

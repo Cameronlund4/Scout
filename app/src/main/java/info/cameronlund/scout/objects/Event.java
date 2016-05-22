@@ -3,13 +3,19 @@ package info.cameronlund.scout.objects;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 import com.google.gson.JsonObject;
 
 import org.joda.time.format.ISODateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import info.cameronlund.scout.MainActivity;
 
 // TODO Handle level
 public class Event implements Parcelable, Comparable<Event> {
@@ -28,7 +34,7 @@ public class Event implements Parcelable, Comparable<Event> {
     private Location location;
     private Date date;
     private String sku;
-    private List<Team> teams;
+    private List<Team> teams = new ArrayList<>();
     private String level = "VRC";
 
     public Event(JsonObject json) {
@@ -38,6 +44,33 @@ public class Event implements Parcelable, Comparable<Event> {
         name = json.get("name").getAsString();
         sku = json.get("sku").getAsString();
         level = json.get("program").getAsString();
+    }
+
+    public Event(DataSnapshot ref) {
+        sku = ref.getKey();
+        location = new Location((String) ref.child("location").getValue());
+        date = new Date((long) ref.child("date").getValue());
+        level = (String) ref.child("level").getValue();
+        name = (String) ref.child("name").getValue();
+        DataSnapshot teamRef = ref.child("teams");
+        teams = new ArrayList<>();
+        for (DataSnapshot team : teamRef.getChildren()) {
+            teams.add(new Team(team));
+        }
+    }
+
+    public void saveToFirebase(DatabaseReference ref) {
+        if (!ref.getKey().equals(sku))
+            Log.e(MainActivity.PREFIX, "Setting event " + sku + " to non-sku key! (" + ref.getKey() + ")");
+        ref.child("location").setValue(location.serialize());
+        ref.child("date").setValue(date.getTime());
+        ref.child("level").setValue(level);
+        ref.child("name").setValue(name);
+        DatabaseReference teamRef = ref.child("teams");
+        if (teams != null)
+            for (Team team : teams) {
+                team.saveToFirebase(teamRef.child(team.getTeamNumber()));
+            }
     }
 
     public Event(String date, Location location, String name, String sku, String level) {
@@ -61,6 +94,7 @@ public class Event implements Parcelable, Comparable<Event> {
         location = new Location(in.readString());
         name = in.readString();
         sku = in.readString();
+        level = in.readString();
     }
 
     public String getName() {
@@ -90,6 +124,7 @@ public class Event implements Parcelable, Comparable<Event> {
         dest.writeString(location.serialize());
         dest.writeString(name);
         dest.writeString(sku);
+        dest.writeString(level);
     }
 
     @Override

@@ -1,9 +1,16 @@
 package info.cameronlund.scout.objects;
 
+import android.util.Log;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+
+import info.cameronlund.scout.MainActivity;
 
 public class Team {
     private String teamNumber = "";
@@ -21,6 +28,30 @@ public class Team {
 
     public Team(JsonObject json) {
         populateFromJson(json);
+    }
+
+    public Team(DataSnapshot ref) {
+        if (!ref.getKey().equals(teamNumber))
+            Log.e(MainActivity.PREFIX,"Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
+        teamName = (String) ref.child("teamName").getValue();
+        bestRobotScore = (int) ref.child("bestRobotScore").getValue();
+        bestProgrammingScore = (int) ref.child("bestProgrammingScore").getValue();
+        rating = (float) ref.child("rating").getValue();
+        bestRank = (int) ref.child("bestRank").getValue();
+        averageRank = (int) ref.child("averageRank").getValue();
+        // TODO Handle awards
+    }
+
+    public void saveToFirebase(DatabaseReference ref) {
+        if (!ref.getKey().equals(teamNumber))
+            Log.e(MainActivity.PREFIX,"Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
+        ref.child("teamName").setValue(teamName);
+        ref.child("bestRobotScore").setValue(bestRobotScore);
+        ref.child("bestProgrammingScore").setValue(bestProgrammingScore);
+        ref.child("rating").setValue(rating);
+        ref.child("bestRank").setValue(bestRank);
+        ref.child("averageRank").setValue(averageRank);
+        // TODO Handle awards
     }
 
     public void populateFromJson(JsonObject json) {

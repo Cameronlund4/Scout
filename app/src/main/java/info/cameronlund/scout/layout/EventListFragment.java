@@ -31,6 +31,15 @@ public class EventListFragment extends Fragment {
         adapter.setEvents(events);
     }
 
+    public void showLoading(boolean loading, String message) {
+        assert getActivity().findViewById(R.id.eventListLoading) != null;
+        assert getActivity().findViewById(R.id.eventListRecycler) != null;
+        getActivity().findViewById(R.id.eventListLoading).setVisibility(loading ? View.VISIBLE : View.GONE);
+        getActivity().findViewById(R.id.eventListRecycler).setVisibility(!loading ? View.VISIBLE : View.GONE);
+        if (loading)
+            ((TextView) getActivity().findViewById(R.id.eventListLoadingSub)).setText(message);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
