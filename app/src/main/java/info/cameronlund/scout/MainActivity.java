@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         database = FirebaseDatabase.getInstance();
         auth = FirebaseAuth.getInstance();
+        queue = Volley.newRequestQueue(this);
 
         // TODO Handle fragments, somehow...
 
@@ -76,24 +77,26 @@ public class MainActivity extends AppCompatActivity {
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                showLoading(false,"Pulling event data...");
+                final FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     isLoggedIn = true;
                     hideSoftKeyboard();
                     Log.d(PREFIX + AUTH_SUFFIX, "We're logged in!");
-                    database.getReference().child("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
+                    database.getReference().child("users").child(user.getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             events = new ArrayList<>();
                             if (dataSnapshot.getChildrenCount() < 1) {
                                 showLoading(true,"Pulling fake data...");
+                                getExampleEvents(user);
                                 return;
                             }
                             for (DataSnapshot event : dataSnapshot.getChildren()) {
                                 events.add(new Event(event));
                             }
                             setEvents(events);
-                            showLoading(false,"Pulling event data...");
+                            showLoading(false,"Pulling real event data...");
                         }
 
                         @Override
@@ -110,15 +113,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        if (!isLoggedIn) return;
-
-        assert FirebaseAuth.getInstance().getCurrentUser() != null;
-
         /*
         //// Register all listeners
          */
         FirebaseAuth.getInstance().addAuthStateListener(authListener); // Decide if needs to log in
-        queue = Volley.newRequestQueue(this);
 
         /*
         //// See if we need to handle saved instances
@@ -148,8 +146,6 @@ public class MainActivity extends AppCompatActivity {
         if (getActionBar() != null)
             getActionBar().setTitle(R.string.event_list_title);
         listFragment = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.eventListFragment);
-        listFragment.showLoading(true, "Pulling your events..."); // TODO Counter this when we have it actually pulling from firebase
-        getExampleEvents();
         hideSoftKeyboard();
     }
 
@@ -196,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
         listFragment.setEvents(events);
     }
 
-    public void getExampleEvents() {
+    public void getExampleEvents(final FirebaseUser user) {
         listFragment.showLoading(true, "Pulling example events...");
         String url = "http://api.vexdb.io/v1/get_events?";
         try {
@@ -207,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.d("Scout", "URL: " + url);
         // Request a string response from the provided URL.
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+        final JsonObjectRequest jsObjRequest = new JsonObjectRequest
                 (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                     ArrayList<Event> events = new ArrayList<>();
 
@@ -232,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("Request data", "Size post: " + events.size());
                             setEvents(events);
                             listFragment.showLoading(false, "Pushing example data...");
-                            DatabaseReference eventRef =  database.getReference().child("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("Nothing But Net");
+                            DatabaseReference eventRef =  database.getReference().child("users").child(user.getUid()).child("Nothing But Net");
                             for (Event event : events) {
                                event.saveToFirebase(eventRef.child(event.getSku()));
                             }
@@ -257,5 +253,9 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.contentMain).setVisibility(!loading ? View.VISIBLE : View.GONE);
         if (loading)
             ((TextView) findViewById(R.id.mainLoadingSub)).setText(message);
+    }
+
+    public void eventCardClicked(View view) {
+        
     }
 }

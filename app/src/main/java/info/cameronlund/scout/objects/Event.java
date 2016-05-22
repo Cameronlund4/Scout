@@ -32,7 +32,7 @@ public class Event implements Parcelable, Comparable<Event> {
     JsonObject json;
     private String name;
     private Location location;
-    private Date date;
+    private Date date = new Date(System.currentTimeMillis());
     private String sku;
     private List<Team> teams = new ArrayList<>();
     private String level = "VRC";
@@ -49,6 +49,7 @@ public class Event implements Parcelable, Comparable<Event> {
     public Event(DataSnapshot ref) {
         sku = ref.getKey();
         location = new Location((String) ref.child("location").getValue());
+        if (ref.child("date") != null)
         date = new Date((long) ref.child("date").getValue());
         level = (String) ref.child("level").getValue();
         name = (String) ref.child("name").getValue();
