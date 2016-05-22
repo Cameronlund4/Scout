@@ -21,6 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import info.cameronlund.scout.layout.EventListFragment;
 import info.cameronlund.scout.layout.LoginFragment;
 
+// TODO Fix the WTFness
 public class LoginActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private FirebaseAuth auth;
@@ -85,6 +86,8 @@ public class LoginActivity extends AppCompatActivity {
                                                     // TODO tell the user why they failed
                                                 } else {
                                                     // TODO Set up all the default values
+                                                    Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "We finished 2");
+                                                    finish();
                                                 }
                                             }
                                         });
@@ -94,7 +97,8 @@ public class LoginActivity extends AppCompatActivity {
                                 // TODO Tell the user of their error
                             }
                         } else {
-
+                            Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "We finished 3");
+                            finish();
                         }
                     }
                 });

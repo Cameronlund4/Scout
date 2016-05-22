@@ -1,32 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context="info.cameronlund.scout.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/activityMainAppbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
     <RelativeLayout
-        android:id="@+id/contentMain"
+        android:id="@+id/contentPicker"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="?android:attr/actionBarSize">
+        android:layout_height="match_parent">
 
         <fragment
             android:id="@+id/eventListFragment"
@@ -41,7 +24,7 @@
         android:layout_height="match_parent">
 
         <RelativeLayout
-            android:id="@+id/mainLoading"
+            android:id="@+id/pickerLoading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -49,17 +32,17 @@
             tools:ignore="UselessParent">
 
             <TextView
-                android:id="@+id/mainLoadingSuper"
+                android:id="@+id/pickerLoadingSuper"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/loading"
                 android:textSize="30sp" />
 
             <TextView
-                android:id="@+id/mainLoadingSub"
+                android:id="@+id/pickerLoadingSub"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/mainLoadingSuper"
+                android:layout_below="@id/pickerLoadingSuper"
                 android:layout_centerHorizontal="true"
                 android:ellipsize="end"
                 android:singleLine="true"

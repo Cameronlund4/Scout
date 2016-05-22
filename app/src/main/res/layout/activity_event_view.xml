@@ -29,5 +29,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:id="@+id/eventViewTest"
         android:text="20 cooper run drive cherry hill new jersey 08003 united states"/>
 </RelativeLayout>

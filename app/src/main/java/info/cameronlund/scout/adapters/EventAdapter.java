@@ -1,5 +1,6 @@
 package info.cameronlund.scout.adapters;
 
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.cameronlund.scout.MainActivity;
 import info.cameronlund.scout.R;
 import info.cameronlund.scout.objects.Event;
 
@@ -42,6 +44,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.EventViewHol
         eventViewHolder.location.setText(events.get(i).getLocation().getVenue());
         eventViewHolder.date.setText(dateFormat.format(events.get(i).getDate()));
         eventViewHolder.level.setText(events.get(i).getLevel());
+        eventViewHolder.itemView.setTag(events.get(i));
     }
 
     @Override

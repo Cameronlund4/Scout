@@ -26,12 +26,12 @@ public class Location {
     public Location(String loc) {
         String[] locSplit = loc.split(";");
         line1 = locSplit[0];
-        line2 = locSplit[0];
-        zip = locSplit[0];
-        city = locSplit[0];
-        region = locSplit[0];
-        country = locSplit[0];
-        venue = locSplit[0];
+        line2 = locSplit[1];
+        zip = locSplit[2];
+        city = locSplit[3];
+        region = locSplit[4];
+        country = locSplit[5];
+        venue = locSplit[6];
     }
 
     public static String serialize(String line1, String line2, String zip, String city, String region, String country, String venue) {

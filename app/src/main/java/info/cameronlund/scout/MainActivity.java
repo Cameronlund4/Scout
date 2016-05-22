@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     public static String PREFIX = "Scout";
     public static String AUTH_SUFFIX = "Auth";
     public static int REQUEST_LOGIN = 1;
+    public static int EVENT_TAG = 69;
     private EventListFragment listFragment;
     private boolean isLoggedIn = false;
     private FirebaseDatabase database;
@@ -77,9 +78,9 @@ public class MainActivity extends AppCompatActivity {
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                showLoading(false,"Pulling event data...");
+                showLoading(true, "Pulling event data...");
                 final FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
+                if (firebaseAuth.getCurrentUser() != null) {
                     isLoggedIn = true;
                     hideSoftKeyboard();
                     Log.d(PREFIX + AUTH_SUFFIX, "We're logged in!");
@@ -88,15 +89,14 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             events = new ArrayList<>();
                             if (dataSnapshot.getChildrenCount() < 1) {
-                                showLoading(true,"Pulling fake data...");
+                                showLoading(true, "Pulling fake data...");
                                 getExampleEvents(user);
-                                return;
                             }
                             for (DataSnapshot event : dataSnapshot.getChildren()) {
                                 events.add(new Event(event));
                             }
                             setEvents(events);
-                            showLoading(false,"Pulling real event data...");
+                            showLoading(false, "Pulling real event data...");
                         }
 
                         @Override
@@ -124,14 +124,14 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             events = savedInstanceState.getParcelableArrayList("events");
         } else {
-            showLoading(true,"Pulling event data...");
+            showLoading(true, "Pulling event data...");
         }
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putParcelableArrayList("events",events);
+        savedInstanceState.putParcelableArrayList("events", events);
     }
 
     @Override
@@ -154,7 +154,8 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_add_event) {
-            // TODO Open a filtering page which can do shit like filter
+            Intent intent = new Intent(this, EventPickerActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -169,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_LOGIN) {
+            Log.d(PREFIX + "Test", "Worked");
             if (resultCode == 0) {
                 finish();
             }
@@ -184,7 +186,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void startLoginActivity() {
         Intent intent = new Intent(this, LoginActivity.class);
-        startActivityForResult(intent, REQUEST_LOGIN);
+        //startActivityForResult(intent, REQUEST_LOGIN);
+        startActivity(intent);
     }
 
     public void setEvents(ArrayList<Event> events) {
@@ -194,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void getExampleEvents(final FirebaseUser user) {
         listFragment.showLoading(true, "Pulling example events...");
-        String url = "http://api.vexdb.io/v1/get_events?";
+        String url = "http://api.vexdb.io/v1/get_events?limit_start=50";
         try {
             url += "&country=" + URLEncoder.encode("United States", "UTF-8");
             // TODO Add params
@@ -228,9 +231,9 @@ public class MainActivity extends AppCompatActivity {
                             Log.d("Request data", "Size post: " + events.size());
                             setEvents(events);
                             listFragment.showLoading(false, "Pushing example data...");
-                            DatabaseReference eventRef =  database.getReference().child("users").child(user.getUid()).child("Nothing But Net");
+                            DatabaseReference eventRef = database.getReference().child("users").child(user.getUid()).child("Nothing But Net");
                             for (Event event : events) {
-                               event.saveToFirebase(eventRef.child(event.getSku()));
+                                event.saveToFirebase(eventRef.child(event.getSku()));
                             }
                             listFragment.showLoading(false, "Pulling example events...");
                         } catch (JSONException e) {
@@ -256,6 +259,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void eventCardClicked(View view) {
-        
+        Log.d(PREFIX, "Heh that tickled");
+        Event event = (Event) view.getTag();
+        Intent intent = new Intent(this, EventViewActivity.class);
+        intent.putExtra(EventViewActivity.EVENT, event);
+        startActivityForResult(intent, 2);
     }
 }

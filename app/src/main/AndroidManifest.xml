@@ -22,7 +22,14 @@
             android:name=".LoginActivity"
             android:label="Login"
             android:theme="@style/AppTheme" />
-        <activity android:name=".EventViewActivity"></activity>
+        <activity
+            android:name=".EventViewActivity"
+            android:label="View Event"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".EventPickerActivity"
+            android:label="Add New Event"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>
