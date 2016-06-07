@@ -103,7 +103,7 @@ public class EventPickerActivity extends AppCompatActivity {
 
     public void updateEvents() {
         showLoading(true, "Grabbing events based on filter...");
-        String url = "http://api.vexdb.io/v1/get_events?limit_start=50";
+        String url = "http://api.vexdb.io/v1/get_events?limit_number=50&country=United%20States";
         try {
             url += "&country=" + URLEncoder.encode("United States", "UTF-8");
             // TODO Add params
@@ -120,7 +120,6 @@ public class EventPickerActivity extends AppCompatActivity {
                     public void onResponse(JSONObject response) {
                         Log.d("Request data", response.toString());
                         try {
-                            showLoading(true, "Parsing returned data...");
                             if (response.getInt("status") != 1) {
                                 // Encountered an error
                                 Log.d("Request data", "Status was an error");
@@ -138,6 +137,7 @@ public class EventPickerActivity extends AppCompatActivity {
                             Log.d("Request data", "Size post: " + events.size());
                             setEvents(events);
                             listFragment.showLoading(false, "Pushing example data...");
+                            showLoading(false, "There are "+events.size()+" events");
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }

@@ -19,8 +19,7 @@ import info.cameronlund.scout.MainActivity;
 
 // TODO Handle level
 public class Event implements Parcelable, Comparable<Event> {
-    public static final Creator<Event> CREATOR
-            = new Creator<Event>() {
+    public static final Creator<Event> CREATOR = new Creator<Event>() {
         public Event createFromParcel(Parcel in) {
             return new Event(in);
         }
@@ -39,7 +38,13 @@ public class Event implements Parcelable, Comparable<Event> {
 
     public Event(JsonObject json) {
         this.json = json;
-        date = ISODateTimeFormat.dateTimeParser().parseDateTime(json.get("start").getAsString()).toDate();
+        try {
+            if (json.get("start") != null)
+                date = ISODateTimeFormat.dateTimeParser().parseDateTime(json.get("start").getAsString()).toDate();
+        }catch (Exception e) {
+            date = new Date(System.currentTimeMillis());
+            Log.e(MainActivity.PREFIX,"Got an error with event time",e);
+        }
         location = new Location(json);
         name = json.get("name").getAsString();
         sku = json.get("sku").getAsString();

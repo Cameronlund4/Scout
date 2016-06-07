@@ -28,7 +28,6 @@ public class EventViewActivity extends AppCompatActivity {
             if (getIntent() != null && getIntent().getParcelableExtra(EVENT) != null) {
                 event = getIntent().getParcelableExtra(EVENT);
                 ((TextView)findViewById(R.id.eventViewTitle)).setText(event.getName());
-                ((TextView)findViewById(R.id.eventViewTest)).setText(event.getLocation().makeDirectable());
             } else {
                 Log.e(MainActivity.PREFIX, "Tried to start an event view without an event!");
                 finish();

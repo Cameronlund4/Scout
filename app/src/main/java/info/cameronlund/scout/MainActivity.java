@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void getExampleEvents(final FirebaseUser user) {
         listFragment.showLoading(true, "Pulling example events...");
-        String url = "http://api.vexdb.io/v1/get_events?limit_start=50";
+        String url = "http://api.vexdb.io/v1/get_events?limit_number=50";
         try {
             url += "&country=" + URLEncoder.encode("United States", "UTF-8");
             // TODO Add params
