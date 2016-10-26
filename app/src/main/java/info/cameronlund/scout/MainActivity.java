@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -35,8 +34,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         if (getSupportActionBar() != null)
-            getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+            getSupportActionBar().setTitle("Scout");//getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
+        else
+            Log.w("Scout", "Can't find support action bar");
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             startLogin();
@@ -73,8 +75,8 @@ public class MainActivity extends AppCompatActivity {
         // -- Set up toolbar
         toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        /*if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);*/
         setTitle(getString(R.string.app_name));
 
         // -- Set up navigation drawer

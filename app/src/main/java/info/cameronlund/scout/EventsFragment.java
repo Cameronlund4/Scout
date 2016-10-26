@@ -113,26 +113,31 @@ public class EventsFragment extends EventListFragment implements Userable {
     @Override
     public void updateCurrentUser(final ScoutUser user) {
         Log.i("Scout","Updated current user");
-        FirebaseDatabase.getInstance().getReference().child("users").child(user.getFirebaseUser()
-                .getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                events = new ArrayList<>();
-                if (dataSnapshot.getChildrenCount() < 1) {
-                    showLoading(true, "Pulling fake data...");
-                    getExampleEvents(user);
+        if (user != null) {
+            FirebaseDatabase.getInstance().getReference().child("users").child(user.getFirebaseUser()
+                    .getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    events = new ArrayList<>();
+                    if (dataSnapshot.getChildrenCount() < 1) {
+                        showLoading(true, "Pulling fake data...");
+                        getExampleEvents(user);
+                    }
+                    for (DataSnapshot event : dataSnapshot.getChildren()) {
+                        events.add(new Event(event));
+                    }
+                    setEvents(events);
+                    showLoading(false, "Pulling real event data...");
                 }
-                for (DataSnapshot event : dataSnapshot.getChildren()) {
-                    events.add(new Event(event));
-                }
-                setEvents(events);
-                showLoading(false, "Pulling real event data...");
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e("Scout",databaseError.getMessage());
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.e("Scout", databaseError.getMessage());
+                }
+            });
+        } else {
+            events = new ArrayList<>();
+            setEvents(events);
+        }
     }
 }
