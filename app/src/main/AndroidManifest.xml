@@ -11,7 +11,7 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/event_list_title"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -19,16 +19,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
-            android:label="Login"
-            android:theme="@style/AppTheme" />
-        <activity
             android:name=".EventViewActivity"
             android:label="View Event"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".EventPickerActivity"
             android:label="Add New Event"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".LoginActivity"
+            android:label="Login"
             android:theme="@style/AppTheme" />
     </application>
 

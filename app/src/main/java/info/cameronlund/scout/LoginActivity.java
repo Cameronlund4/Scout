@@ -1,113 +1,128 @@
 package info.cameronlund.scout;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.database.FirebaseDatabase;
 
-import info.cameronlund.scout.layout.EventListFragment;
-import info.cameronlund.scout.layout.LoginFragment;
-
-// TODO Fix the WTFness
+/**
+ * A login screen that offers login via email/password.
+ */
 public class LoginActivity extends AppCompatActivity {
-    private FirebaseDatabase database;
-    private FirebaseAuth auth;
-    private FirebaseAuth.AuthStateListener authListener;
+    // UI references.
+    private EditText mEmailView;
+    private EditText mPasswordView;
+    private View mProgressView;
+    private View mLoginFormView;
+    private boolean querying = false;
+    private boolean isAdmin = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        database = FirebaseDatabase.getInstance();
-        auth = FirebaseAuth.getInstance();
-        setPageFragment(new LoginFragment());
-    }
+        mEmailView = (EditText) findViewById(R.id.username);
+        mPasswordView = (EditText) findViewById(R.id.password);
 
-    private void setPageFragment(Fragment fragment) {
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                if (firebaseAuth.getCurrentUser() != null) {
+                    isAdmin = false;
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra("result", 0);
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
+                }
+            }
+        });
 
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.mainFragment, fragment);
-        transaction.commit();
-    }
-
-    public void loginButtonClicked(View view) {
-        assert findViewById(R.id.loginPassword) != null;
-        final TextView username = (TextView) findViewById(R.id.loginUsername);
-        assert username != null;
-        final TextView password = (TextView) findViewById(R.id.loginPassword);
-        assert password != null;
-        if (password.getText().toString().length() < 6) {
-            password.setError("Password too short.");
-            return;
-        }
-        // TODO Change following line to the loading on the loading screen
-        /*final TextView statusText = (TextView) findViewById(R.id.loginStatus);
-        findViewById(R.id.loginForm).setVisibility(View.GONE);
-        findViewById(R.id.loginLoading).setVisibility(View.VISIBLE);
-        statusText.setText("Logging in...");*/
-        // TODO Pull up a loading screen, or disable the button and show a loader
         final Activity activity = this;
-        auth.signInWithEmailAndPassword(username.getText().toString(), password.getText().toString())
-                .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        setPageFragment(new EventListFragment());
-                        Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "signInWithEmail:onComplete:" + task.isSuccessful());
-                        if (!task.isSuccessful()) {
-                            Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "signInWithEmail", task.getException());
-                            //noinspection ThrowableResultOfMethodCallIgnored
-                            if (task.getException() instanceof FirebaseAuthInvalidUserException) {
-                                // Credentials didn't pass, but there's not an account with username
-                                // Try to make an account with it.
-                                auth.createUserWithEmailAndPassword(username.getText().toString(), password.getText().toString())
-                                        .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                                Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "createWithEmail:onComplete:" + task.isSuccessful());
-                                                if (!task.isSuccessful()) {
-                                                    // Credentials didn't pass, and we already tried creating an account
-                                                    // Tell this to the user.
-                                                    // TODO tell the user why they failed
-                                                } else {
-                                                    // TODO Set up all the default values
-                                                    Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "We finished 2");
-                                                    finish();
-                                                }
-                                            }
-                                        });
-                            } else {
-                                // Credentials didn't pass, and there is an account with this info.
-                                // Tell this to the user.
-                                // TODO Tell the user of their error
-                            }
-                        } else {
-                            Log.d(MainActivity.PREFIX + MainActivity.AUTH_SUFFIX, "We finished 3");
-                            finish();
-                        }
-                    }
-                });
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mEmailView.getText().toString().length() > 0 &&
+                        mPasswordView.getText().toString().length() > 0) {
+                    showProgress(true);
+                    querying = true;
+
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(mEmailView.getText().toString(),
+                            mPasswordView.getText().toString())
+                            .addOnCompleteListener(activity, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    querying = false;
+                                    if (!task.isSuccessful()) {
+                                        mEmailView.setText("Failed to log in");
+                                    }
+                                }
+                            });
+                }
+            }
+        });
+
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
     }
 
-    public void hideSoftKeyboard() {
-        if (getCurrentFocus() != null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        ((TextView) findViewById(R.id.loginTitle)).setText(!show ? "Sign in to Partbase." :
+                "Signing in to Partbase....");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onBackPressed()
+    {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("result", 1);
+        setResult(Activity.RESULT_OK, returnIntent);
+        finish();
     }
 }
+

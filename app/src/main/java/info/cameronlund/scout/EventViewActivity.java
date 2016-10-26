@@ -29,7 +29,7 @@ public class EventViewActivity extends AppCompatActivity {
                 event = getIntent().getParcelableExtra(EVENT);
                 ((TextView)findViewById(R.id.eventViewTitle)).setText(event.getName());
             } else {
-                Log.e(MainActivity.PREFIX, "Tried to start an event view without an event!");
+                Log.e("Scout", "Tried to start an event view without an event!");
                 finish();
             }
         }

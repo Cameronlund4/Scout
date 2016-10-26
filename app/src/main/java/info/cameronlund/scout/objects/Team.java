@@ -32,7 +32,7 @@ public class Team {
 
     public Team(DataSnapshot ref) {
         if (!ref.getKey().equals(teamNumber))
-            Log.e(MainActivity.PREFIX,"Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
+            Log.e("Scout","Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
         teamName = (String) ref.child("teamName").getValue();
         bestRobotScore = (int) ref.child("bestRobotScore").getValue();
         bestProgrammingScore = (int) ref.child("bestProgrammingScore").getValue();
@@ -44,7 +44,7 @@ public class Team {
 
     public void saveToFirebase(DatabaseReference ref) {
         if (!ref.getKey().equals(teamNumber))
-            Log.e(MainActivity.PREFIX,"Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
+            Log.e("Scout","Setting team "+teamNumber+" to non team number key! ("+ref.getKey()+")");
         ref.child("teamName").setValue(teamName);
         ref.child("bestRobotScore").setValue(bestRobotScore);
         ref.child("bestProgrammingScore").setValue(bestProgrammingScore);

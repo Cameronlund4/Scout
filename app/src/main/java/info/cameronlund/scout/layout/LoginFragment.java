@@ -1,27 +1,17 @@
 package info.cameronlund.scout.layout;
 
-import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import info.cameronlund.scout.LoginActivity;
-import info.cameronlund.scout.MainActivity;
 import info.cameronlund.scout.R;
 
 public class LoginFragment extends Fragment {
@@ -38,7 +28,7 @@ public class LoginFragment extends Fragment {
         return view;
     }
 
-    @Override
+    /*@Override
     public void onStart() {
         super.onStart();
         // Handle the "done" press on password (hits the login button)hideSoftKeyboard();
@@ -51,5 +41,5 @@ public class LoginFragment extends Fragment {
                 return false;
             }
         });
-    }
+    }*/
 }

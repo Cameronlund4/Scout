@@ -43,7 +43,7 @@ public class Event implements Parcelable, Comparable<Event> {
                 date = ISODateTimeFormat.dateTimeParser().parseDateTime(json.get("start").getAsString()).toDate();
         }catch (Exception e) {
             date = new Date(System.currentTimeMillis());
-            Log.e(MainActivity.PREFIX,"Got an error with event time",e);
+            Log.e("Scout","Got an error with event time",e);
         }
         location = new Location(json);
         name = json.get("name").getAsString();
@@ -67,7 +67,7 @@ public class Event implements Parcelable, Comparable<Event> {
 
     public void saveToFirebase(DatabaseReference ref) {
         if (!ref.getKey().equals(sku))
-            Log.e(MainActivity.PREFIX, "Setting event " + sku + " to non-sku key! (" + ref.getKey() + ")");
+            Log.e("Scout", "Setting event " + sku + " to non-sku key! (" + ref.getKey() + ")");
         ref.child("location").setValue(location.serialize());
         ref.child("date").setValue(date.getTime());
         ref.child("level").setValue(level);

@@ -1,268 +1,218 @@
 package info.cameronlund.scout;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Array;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-
-import info.cameronlund.scout.layout.EventListFragment;
-import info.cameronlund.scout.objects.Event;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static String PREFIX = "Scout";
-    public static String AUTH_SUFFIX = "Auth";
-    public static int REQUEST_LOGIN = 1;
-    public static int EVENT_TAG = 69;
-    private EventListFragment listFragment;
-    private boolean isLoggedIn = false;
-    private FirebaseDatabase database;
-    private FirebaseAuth auth;
-    private FirebaseAuth.AuthStateListener authListener;
-    private RequestQueue queue;
-    private ArrayList<Event> events = new ArrayList<>();
+    private DrawerLayout drawer;
+    private ActionBarDrawerToggle drawerToggle;
+    private NavigationView navDrawer;
+    private Class homeFragmentClass = EventsFragment.class;
+    private Toolbar toolbar;
+    private ScoutUser user;
+    private UserInfoListener listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // TODO If there's already a logged in user, pass in instance and reload object
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        database = FirebaseDatabase.getInstance();
-        auth = FirebaseAuth.getInstance();
-        queue = Volley.newRequestQueue(this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
 
-        // TODO Handle fragments, somehow...
-
-        /*
-        //// Create firebase listeners
-        */
-        authListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                showLoading(true, "Pulling event data...");
-                final FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (firebaseAuth.getCurrentUser() != null) {
-                    isLoggedIn = true;
-                    hideSoftKeyboard();
-                    Log.d(PREFIX + AUTH_SUFFIX, "We're logged in!");
-                    database.getReference().child("users").child(user.getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            events = new ArrayList<>();
-                            if (dataSnapshot.getChildrenCount() < 1) {
-                                showLoading(true, "Pulling fake data...");
-                                getExampleEvents(user);
-                            }
-                            for (DataSnapshot event : dataSnapshot.getChildren()) {
-                                events.add(new Event(event));
-                            }
-                            setEvents(events);
-                            showLoading(false, "Pulling real event data...");
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError firebaseError) {
-                            // Failed to read value
-                            Log.w(PREFIX, "Failed to read value.", firebaseError.toException());
-                        }
-                    });
-                } else {
-                    Log.d(PREFIX + AUTH_SUFFIX, "We're logged out!");
-                    isLoggedIn = false;
-                    startLoginActivity();
-                }
-            }
-        };
-
-        /*
-        //// Register all listeners
-         */
-        FirebaseAuth.getInstance().addAuthStateListener(authListener); // Decide if needs to log in
-
-        /*
-        //// See if we need to handle saved instances
-         */
-        if (savedInstanceState != null) {
-            events = savedInstanceState.getParcelableArrayList("events");
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            startLogin();
+            return;
         } else {
-            showLoading(true, "Pulling event data...");
+            listener = new UserInfoListener() {
+                @Override
+                public void onUserInfoChanged(ScoutUser user) {
+                    notifyFragmentUser(getRunningFragment());
+                    //navDrawer.getMenu().setGroupVisible(R.id.admin_tools, user.isAdmin());
+                }
+            };
+
+            user = new ScoutUser(FirebaseAuth.getInstance().getCurrentUser(), listener);
         }
 
-    }
+        FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                check:
+                if (firebaseAuth.getCurrentUser() == null) {
+                    ensureDeadUser();
+                    startLogin();
+                } else {
+                    if (user != null)
+                        if (user.getFirebaseUser().getUid()
+                                .equalsIgnoreCase(firebaseAuth.getCurrentUser().getUid()))
+                            break check;
+                    user = new ScoutUser(firebaseAuth.getCurrentUser(), listener);
+                }
+            }
+        });
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putParcelableArrayList("events", events);
+        // -- Set up toolbar
+        toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        setTitle(getString(R.string.app_name));
+
+        // -- Set up navigation drawer
+        drawer = (DrawerLayout) findViewById(R.id.main_nav_layout);
+        drawerToggle = setupDrawerToggle();
+        drawer.addDrawerListener(drawerToggle);
+        navDrawer = (NavigationView) findViewById(R.id.nav_view);
+        setupDrawerContent(navDrawer);
+
+        // -- Set up the current fragment if there isn't one
+        if (getRunningFragment() == null) {
+            try {
+                setMainFragment(createFragment(homeFragmentClass));
+            } catch (Exception e) {
+                // TODO Figure out what to do here... we have no content in this case
+            }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_appbar, menu);
         return true;
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (getActionBar() != null)
-            getActionBar().setTitle(R.string.event_list_title);
-        listFragment = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.eventListFragment);
-        hideSoftKeyboard();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_add_event) {
-            Intent intent = new Intent(this, EventPickerActivity.class);
-            startActivity(intent);
+        if (!drawerToggle.onOptionsItemSelected(item)) {
+            if (item.getItemId() == R.id.logout)
+                FirebaseAuth.getInstance().signOut();
             return true;
         }
-
-        if (id == R.id.action_sign_out) {
-            FirebaseAuth.getInstance().signOut();
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_LOGIN) {
-            Log.d(PREFIX + "Test", "Worked");
-            if (resultCode == 0) {
-                finish();
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        drawerToggle.syncState();
+    }
+
+    private Fragment createFragment(Class fragmentClass) throws IllegalAccessException,
+            InstantiationException {
+        try {
+            return (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            Log.e("Test", "Failed to create a fragment!", e);
+            throw e;
+        }
+    }
+
+    private Fragment getRunningFragment() {
+        FragmentManager fragManager = getSupportFragmentManager();
+        return fragManager.findFragmentById(R.id.main_fragment_content);
+    }
+
+    private void setMainFragment(Fragment fragment) {
+        notifyFragmentUser(fragment);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.main_fragment_content, fragment).commit();
+    }
+
+    public void notifyFragmentUser(Fragment fragment) {
+        if (fragment instanceof Userable)
+            ((Userable) fragment).updateCurrentUser(user);
+    }
+
+    private ActionBarDrawerToggle setupDrawerToggle() {
+        return new ActionBarDrawerToggle(this, drawer, toolbar, R.string.app_name, R.string.app_name);
+    }
+
+    private void setupDrawerContent(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                        selectDrawerItem(menuItem);
+                        return true;
+                    }
+                });
+    }
+
+    private void selectDrawerItem(MenuItem menuItem) {
+        Fragment fragment = null;
+        Class fragmentClass;
+        switch (menuItem.getItemId()) {
+            case R.id.menu_nav_home:
+                fragmentClass = homeFragmentClass;
+                break;
+            default:
+                fragmentClass = homeFragmentClass;
+        }
+
+        try {
+            fragment = createFragment(fragmentClass);
+        } catch (Exception e) {
+            Log.e("Partbase", "Failed to load fragment", e);
+            // TODO Figure out what to do here... we have no content in this case
+        }
+
+        setMainFragment(fragment);
+        menuItem.setChecked(true);
+
+        if (menuItem.getItemId() == R.id.menu_nav_home)
+            setTitle(getString(R.string.app_name));
+        else
+            setTitle(menuItem.getTitle());
+
+        drawer.closeDrawers();
+    }
+
+    private void startLogin() {
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0) { // Login
+            if (resultCode == RESULT_OK) {
+                if (data.getIntExtra("result", 1) != 0)
+                    finish();
             }
         }
     }
 
-    public void hideSoftKeyboard() {
-        if (getCurrentFocus() != null) {
-            InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+    @Override
+    public void onStop() {
+        super.onStop();
+        ensureDeadUser();
+    }
+
+    private void ensureDeadUser() {
+        if (user != null) {
+            user.destroy();
+            user = null;
         }
-    }
-
-    public void startLoginActivity() {
-        Intent intent = new Intent(this, LoginActivity.class);
-        //startActivityForResult(intent, REQUEST_LOGIN);
-        startActivity(intent);
-    }
-
-    public void setEvents(ArrayList<Event> events) {
-        this.events = events;
-        listFragment.setEvents(events);
-    }
-
-    public void getExampleEvents(final FirebaseUser user) {
-        listFragment.showLoading(true, "Pulling example events...");
-        String url = "http://api.vexdb.io/v1/get_events?limit_number=50";
-        try {
-            url += "&country=" + URLEncoder.encode("United States", "UTF-8");
-            // TODO Add params
-        } catch (UnsupportedEncodingException e) {
-            Log.e("Scout", "Failed to encode URL", e);
-        }
-        Log.d("Scout", "URL: " + url);
-        // Request a string response from the provided URL.
-        final JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                    ArrayList<Event> events = new ArrayList<>();
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Log.d("Request data", response.toString());
-                        try {
-                            if (response.getInt("status") != 1) {
-                                // Encountered an error
-                                Log.d("Request data", "Status was an error");
-                                return;
-                            }
-                            // JSONArray to JsonArray (GSON FTW)
-                            JSONArray eventsJson = response.getJSONArray("result");
-                            JsonParser jsonParser = new JsonParser();
-                            JsonArray gsonArray = (JsonArray) jsonParser.parse(eventsJson.toString());
-                            // New event for each part of the Json Array
-                            Log.d("Request data", "Size pre: " + gsonArray.size());
-                            for (JsonElement object : gsonArray) {
-                                events.add(new Event(object.getAsJsonObject()));
-                            }
-                            Log.d("Request data", "Size post: " + events.size());
-                            setEvents(events);
-                            listFragment.showLoading(false, "Pushing example data...");
-                            DatabaseReference eventRef = database.getReference().child("users").child(user.getUid()).child("Nothing But Net");
-                            for (Event event : events) {
-                                event.saveToFirebase(eventRef.child(event.getSku()));
-                            }
-                            listFragment.showLoading(false, "Pulling example events...");
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-                    }
-                });
-        queue.add(jsObjRequest);
-    }
-
-    public void showLoading(boolean loading, String message) {
-        assert findViewById(R.id.mainLoading) != null;
-        assert findViewById(R.id.contentMain) != null;
-        findViewById(R.id.mainLoading).setVisibility(loading ? View.VISIBLE : View.GONE);
-        findViewById(R.id.contentMain).setVisibility(!loading ? View.VISIBLE : View.GONE);
-        if (loading)
-            ((TextView) findViewById(R.id.mainLoadingSub)).setText(message);
-    }
-
-    public void eventCardClicked(View view) {
-        Log.d(PREFIX, "Heh that tickled");
-        Event event = (Event) view.getTag();
-        Intent intent = new Intent(this, EventViewActivity.class);
-        intent.putExtra(EventViewActivity.EVENT, event);
-        startActivityForResult(intent, 2);
     }
 }
