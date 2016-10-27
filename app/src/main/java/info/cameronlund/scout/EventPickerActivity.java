@@ -15,8 +15,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -31,7 +29,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import info.cameronlund.scout.layout.EventListFragment;
-import info.cameronlund.scout.layout.LoginFragment;
 import info.cameronlund.scout.objects.Event;
 
 public class EventPickerActivity extends AppCompatActivity {

@@ -22,6 +22,7 @@ public class EventListFragment extends Fragment {
 
     private EventAdapter adapter;
     private List<Event> events = new ArrayList<>();
+    private RecyclerView recyclerView;
 
     public EventListFragment() {
     }
@@ -45,12 +46,20 @@ public class EventListFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_event_list, container, false);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.eventListRecycler);
+        recyclerView = (RecyclerView) view.findViewById(R.id.eventListRecycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
         adapter = new EventAdapter(events);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.divider));
         return view;
+    }
+
+    public EventAdapter getRecyclerAdapter() {
+        return adapter;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
     }
 }

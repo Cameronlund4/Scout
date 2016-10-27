@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,11 +18,18 @@ import info.cameronlund.scout.objects.Event;
 public class EventViewActivity extends AppCompatActivity {
     public static String EVENT = "EventViewActivity.event";
     private Event event;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_view);
+
+        // -- Set up toolbar
+        toolbar = (Toolbar) findViewById(R.id.event_toolbar);
+        setSupportActionBar(toolbar);
+        setTitle(getString(R.string.app_name));
+
         if (savedInstanceState != null) {
             event = savedInstanceState.getParcelable(EVENT);
         } else {

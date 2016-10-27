@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
         <item
@@ -10,10 +11,10 @@
         <item
             android:id="@+id/menu_nav_schedule"
             android:icon="@drawable/ic_filter"
-            android:title="Teans" />
+            android:title="Teams" />
         <item
             android:id="@+id/menu_nav_planner"
             android:icon="@drawable/ic_filter"
-            android:title="Idek" />
+            android:title="Selections" />
     </group>
 </menu>

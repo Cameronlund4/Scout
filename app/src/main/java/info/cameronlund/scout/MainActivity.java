@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -34,11 +35,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setTitle("Scout");//getSupportActionBar().setTitle(getResources().getString(R.string.app_name));
-        else
-            Log.w("Scout", "Can't find support action bar");
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             startLogin();
@@ -216,5 +212,10 @@ public class MainActivity extends AppCompatActivity {
             user.destroy();
             user = null;
         }
+    }
+
+    public void eventCardClicked(View view) {
+        if (getRunningFragment() instanceof EventClickable)
+            ((EventClickable) getRunningFragment()).eventCardClicked(view);
     }
 }

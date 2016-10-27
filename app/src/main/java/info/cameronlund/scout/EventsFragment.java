@@ -1,9 +1,11 @@
 package info.cameronlund.scout;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -31,7 +33,7 @@ import java.util.ArrayList;
 import info.cameronlund.scout.layout.EventListFragment;
 import info.cameronlund.scout.objects.Event;
 
-public class EventsFragment extends EventListFragment implements Userable {
+public class EventsFragment extends EventListFragment implements Userable, EventClickable {
 
     private static final String TAG = "EventsFragment";
 
@@ -125,9 +127,9 @@ public class EventsFragment extends EventListFragment implements Userable {
                     }
                     for (DataSnapshot event : dataSnapshot.getChildren()) {
                         events.add(new Event(event));
+                        showLoading(false, "Pulling real event data...");
                     }
                     setEvents(events);
-                    showLoading(false, "Pulling real event data...");
                 }
 
                 @Override
@@ -139,5 +141,13 @@ public class EventsFragment extends EventListFragment implements Userable {
             events = new ArrayList<>();
             setEvents(events);
         }
+    }
+
+    @Override
+    public void eventCardClicked(View view) {
+        int position = getRecyclerView().getChildLayoutPosition(view);
+        Intent intent = new Intent(getActivity(), EventViewActivity.class);
+        intent.putExtra(EventViewActivity.EVENT, events.get(position));
+        startActivity(intent);
     }
 }
