@@ -116,7 +116,7 @@ public class EventsFragment extends EventListFragment implements Userable, Event
     public void updateCurrentUser(final ScoutUser user) {
         Log.i("Scout","Updated current user");
         if (user != null) {
-            FirebaseDatabase.getInstance().getReference().child("users").child(user.getFirebaseUser()
+            /*FirebaseDatabase.getInstance().getReference().child("users").child(user.getFirebaseUser()
                     .getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -136,7 +136,8 @@ public class EventsFragment extends EventListFragment implements Userable, Event
                 public void onCancelled(DatabaseError databaseError) {
                     Log.e("Scout", databaseError.getMessage());
                 }
-            });
+            });*/
+            events = user.getEvents();
         } else {
             events = new ArrayList<>();
             setEvents(events);

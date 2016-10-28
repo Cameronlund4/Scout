@@ -19,12 +19,14 @@ import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 
+import info.cameronlund.scout.layout.EventListFragment;
+
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawer;
     private ActionBarDrawerToggle drawerToggle;
     private NavigationView navDrawer;
-    private Class homeFragmentClass = EventsFragment.class;
+    private Class homeFragmentClass = EventInfoFragment.class;
     private Toolbar toolbar;
     private ScoutUser user;
     private UserInfoListener listener;
@@ -84,11 +86,16 @@ public class MainActivity extends AppCompatActivity {
 
         // -- Set up the current fragment if there isn't one
         if (getRunningFragment() == null) {
+            Fragment fragment = null;
             try {
-                setMainFragment(createFragment(homeFragmentClass));
+                fragment = createFragment(homeFragmentClass);
             } catch (Exception e) {
+                Log.e("Partbase", "Failed to load fragment", e);
                 // TODO Figure out what to do here... we have no content in this case
             }
+
+            if (fragment != null)
+                setMainFragment(fragment);
         }
     }
 
@@ -102,9 +109,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (!drawerToggle.onOptionsItemSelected(item)) {
-            if (item.getItemId() == R.id.logout)
+            if (item.getItemId() == R.id.logout) {
                 FirebaseAuth.getInstance().signOut();
-            return true;
+                return true;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -163,6 +171,9 @@ public class MainActivity extends AppCompatActivity {
         switch (menuItem.getItemId()) {
             case R.id.menu_nav_home:
                 fragmentClass = homeFragmentClass;
+                break;
+            case R.id.menu_nav_teams:
+                fragmentClass = EventListFragment.class;
                 break;
             default:
                 fragmentClass = homeFragmentClass;

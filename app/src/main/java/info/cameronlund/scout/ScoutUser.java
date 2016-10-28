@@ -10,10 +10,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.cameronlund.scout.objects.Event;
+
 public class ScoutUser {
 
 
     private FirebaseUser user;
+    private ArrayList<Event> events = new ArrayList<>();
     private ValueEventListener listener;
     private List<UserInfoListener> listeners = new ArrayList<>();
 
@@ -30,7 +33,9 @@ public class ScoutUser {
         listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                // TODO Set user data
+                events = new ArrayList<>();
+                for (DataSnapshot event : dataSnapshot.child("Nothing But Net").getChildren())
+                    events.add(new Event(event));
                 for (UserInfoListener listener : listeners)
                     listener.onUserInfoChanged(userInstance);
             }
@@ -59,5 +64,9 @@ public class ScoutUser {
 
     public FirebaseUser getFirebaseUser() {
         return user;
+    }
+
+    public ArrayList<Event> getEvents() {
+        return events;
     }
 }

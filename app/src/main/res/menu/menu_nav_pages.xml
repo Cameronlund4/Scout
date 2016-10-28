@@ -7,13 +7,13 @@
             android:id="@+id/menu_nav_home"
             android:checked="true"
             android:icon="@drawable/ic_filter"
-            android:title="Events" />
+            android:title="Event Information" />
         <item
-            android:id="@+id/menu_nav_schedule"
+            android:id="@+id/menu_nav_teams"
             android:icon="@drawable/ic_filter"
-            android:title="Teams" />
+            android:title="Team List" />
         <item
-            android:id="@+id/menu_nav_planner"
+            android:id="@+id/menu_nav_selections"
             android:icon="@drawable/ic_filter"
             android:title="Selections" />
     </group>
