@@ -38,6 +38,7 @@ public class Event implements Parcelable, Comparable<Event> {
 
     public Event(JsonObject json) {
         this.json = json;
+        Log.i("Scout","Event JSON: "+json);
         try {
             if (json.get("start") != null)
                 date = ISODateTimeFormat.dateTimeParser().parseDateTime(json.get("start").getAsString()).toDate();

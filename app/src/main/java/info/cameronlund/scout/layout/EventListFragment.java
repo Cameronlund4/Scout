@@ -1,8 +1,8 @@
 package info.cameronlund.scout.layout;
 
 import android.content.pm.ActivityInfo;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -29,12 +29,17 @@ public class EventListFragment extends Fragment {
 
     public void setEvents(List<Event> events) {
         this.events = events;
-        adapter.setEvents(events);
+        if (adapter != null)
+            adapter.setEvents(events);
     }
 
     public void showLoading(boolean loading, String message) {
-        assert getActivity().findViewById(R.id.eventListLoading) != null;
-        assert getActivity().findViewById(R.id.eventListRecycler) != null;
+        if (getActivity() == null)
+            return;
+        if (getActivity().findViewById(R.id.eventListLoading) == null)
+            return;
+        if (getActivity().findViewById(R.id.eventListRecycler) == null)
+            return;
         getActivity().findViewById(R.id.eventListLoading).setVisibility(loading ? View.VISIBLE : View.GONE);
         getActivity().findViewById(R.id.eventListRecycler).setVisibility(!loading ? View.VISIBLE : View.GONE);
         if (loading)
@@ -51,6 +56,7 @@ public class EventListFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new EventAdapter(events);
         recyclerView.setAdapter(adapter);
+        adapter.setEvents(events);
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), R.drawable.divider));
         return view;
     }

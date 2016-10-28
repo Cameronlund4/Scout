@@ -14,7 +14,6 @@ import info.cameronlund.scout.objects.Event;
 
 public class ScoutUser {
 
-
     private FirebaseUser user;
     private ArrayList<Event> events = new ArrayList<>();
     private ValueEventListener listener;
@@ -36,8 +35,7 @@ public class ScoutUser {
                 events = new ArrayList<>();
                 for (DataSnapshot event : dataSnapshot.child("Nothing But Net").getChildren())
                     events.add(new Event(event));
-                for (UserInfoListener listener : listeners)
-                    listener.onUserInfoChanged(userInstance);
+                callUpdateListeners();
             }
 
             @Override
@@ -46,6 +44,11 @@ public class ScoutUser {
             }
         };
         ref.addValueEventListener(listener);
+    }
+
+    private void callUpdateListeners() {
+        for (UserInfoListener listener : listeners)
+            listener.onUserInfoChanged(this);
     }
 
     public void destroy() {
@@ -68,5 +71,10 @@ public class ScoutUser {
 
     public ArrayList<Event> getEvents() {
         return events;
+    }
+
+    public void setEvents(ArrayList<Event> events) {
+        this.events = events;
+        callUpdateListeners();
     }
 }

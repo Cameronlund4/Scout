@@ -173,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                 fragmentClass = homeFragmentClass;
                 break;
             case R.id.menu_nav_teams:
-                fragmentClass = EventListFragment.class;
+                fragmentClass = EventsFragment.class;
                 break;
             default:
                 fragmentClass = homeFragmentClass;

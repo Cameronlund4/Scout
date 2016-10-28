@@ -13,11 +13,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -39,11 +36,15 @@ public class EventsFragment extends EventListFragment implements Userable, Event
 
     protected ArrayList<Event> events;
     private RequestQueue queue;
+    private ScoutUser user;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         queue = Volley.newRequestQueue(getActivity());
+        if (user != null)
+            if (events.size() < 1)
+                getExampleEvents(user);
     }
 
     @Override
@@ -102,6 +103,7 @@ public class EventsFragment extends EventListFragment implements Userable, Event
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        user.setEvents(events);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -114,7 +116,7 @@ public class EventsFragment extends EventListFragment implements Userable, Event
 
     @Override
     public void updateCurrentUser(final ScoutUser user) {
-        Log.i("Scout","Updated current user");
+        Log.i("Scout", "Updated current user");
         if (user != null) {
             /*FirebaseDatabase.getInstance().getReference().child("users").child(user.getFirebaseUser()
                     .getUid()).child("Nothing But Net").addValueEventListener(new ValueEventListener() {
@@ -137,7 +139,9 @@ public class EventsFragment extends EventListFragment implements Userable, Event
                     Log.e("Scout", databaseError.getMessage());
                 }
             });*/
+            this.user = user;
             events = user.getEvents();
+            setEvents(events);
         } else {
             events = new ArrayList<>();
             setEvents(events);
